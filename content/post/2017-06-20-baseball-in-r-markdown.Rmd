@@ -1,0 +1,48 @@
+---
+title: "Baseball Predictions"
+author: "Catherine Cimini"
+date: "2017-06-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The Logit Model 
+The following model is looking at commonly tracked baseball statistics to see what statistics can be used for predicting playoff births.  The summary of the statistics are in the table below.  We are looking at batting average, on base percentage, slugging percentage, stollen bases WHIP, earned run average, strike outs, win totals, and win percentages, and there are indicator variables for american leage, playoff births, and world series wins.
+
+```{r cars, echo=FALSE}
+library(readr)
+library(foreign)
+library(png)
+Metrics_finalproject_data <- read_csv("~/Desktop/IX/Metrics_finalproject_data.csv")
+summary(Metrics_finalproject_data)
+```
+
+## Example Plot
+
+To look at the binary value of "playoffs" which records what teams make the playoffs in a given year (1) and one team that 
+We are using a logit model to look at the probability that a MLB team makes the playoffs in a given year instead of a standard linear regression because our dependent y value is binary. Y is equal to 1 if a team makes the playoffs and y is equal to 0 if a team does not make the playoffs in a given year.  I have chosen to build a logit model because if I used a normal regression the linear best fit line would have prediction values above 1 and/ or below zero because of how the line is constructed which is unrealistic for the binary variable, playoffs. Instead, logits, by design, use an s shape fit to keep the prediction curve between zero and one. Below is a simplified example of our logit function plotted on a graph. This plot is showing the likelihood a team makes the playoffs based on the teams earned run average in a given year.  The plot has the s curve fit for logit instead of a line to best represent the binary y. 
+
+
+```{r plot ERA, echo=FALSE}
+quartz(title="Playoffs vs. ERA") # creates a quartz window with title
+
+plot(Metrics_finalproject_data$ERA,Metrics_finalproject_data$playoffs,xlab="ERA",ylab="Playoff Birth") # plot with body size on x-axis and survival (0 or 1) on y-axis
+g=glm(playoffs~ERA,family=binomial,data = Metrics_finalproject_data) # run a logistic regression model (in this case, generalized linear model with logit link). see ?glm
+
+curve(predict(g,data.frame(ERA=x),type="resp"),add=TRUE) # draws a curve based on prediction from logistic regression model
+```
+
+## Logit Function 
+
+```{r}
+f = glm(playoffs ~ battingAVG + OBP + SLG + StolenBases + WHIP + ERA + SO, family=binomial(link="logit"), data=Metrics_finalproject_data)
+f
+```
+
+
+
+
+The plot shows a simple logit function, but now we look at our constructed logit function.  When we build our function the output we get is very similar to the output you get with a linear regression.  This function can then be used to predict the likelihood a team makes the playoffs given the stats of the team in a given year.  If you plug in the values of the variables (your x values) the result will be the probability the team will make the playoffs that year.  The logit function is useful because it give more accurate predictions for models that have a binary dependent variable due to the s shaped smoothing effect in comparison to a linear model.  The coefficient values are listed above as they would be for linear regression.  The only problem I have with the r output in comparison to linear models is that in a linear model the p- values and statistical significance are included in the r output but not included for the logit output, but the coefficient values are more accurate than a linear model. 
